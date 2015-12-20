@@ -83,26 +83,4 @@ public class TestController {
         return "test";
     }
 
-    @RequestMapping(value = "/upload",method = RequestMethod.POST)
-    public void uploud(@RequestParam(value = "file",required = true) MultipartFile file){
-        System.out.println("======================================");
-        String token = QiniuCloudConfig.auth.uploadToken(bucket,QiniuCloudConfig.key);
-        System.out.println("token:"+token);
-
-
-        Response response = null;
-        try {
-            byte[] bytes = file.getBytes();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            response = uploadManager.put("hello".getBytes(), QiniuCloudConfig.key,token);
-        }
-        catch (QiniuException e)
-        {
-            e.printStackTrace();
-        }
-    }
-}
+  }
