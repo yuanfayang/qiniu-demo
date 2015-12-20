@@ -19,12 +19,14 @@
 
 <form method="post" action="http://up.qiniu.com"
         enctype="multipart/form-data">
-    <input name="key" type="hidden" value="<resource_key>">
+   <%-- <input name="key" type="hidden" value="<resource_key>">--%>
     <input name="x:<custom_name>" type="hidden" value="<custom_value>">
     <input name="token" type="hidden" value="${token}">
     <input name="file" type="file" />
-    <input name="crc32" type="hidden" />
+<%--
+    <input name="crc32" type="hidden" value="true"/>
     <input name="accept" type="hidden" />
+--%>
 
     <input type="submit">
   </form>
