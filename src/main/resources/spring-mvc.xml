@@ -13,6 +13,9 @@
        <!-- Configures the @Controller programming model -->
        <mvc:annotation-driven/>
 
+       <!--静态资源文件放行-->
+       <mvc:resources mapping="/node_modules/**" location="/node_modules/"/>
+
        <!-- Resolves view names to protected .jsp resources within the /WEB-INF/views directory -->
        <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
               <property name="suffix" value=".jsp"/>

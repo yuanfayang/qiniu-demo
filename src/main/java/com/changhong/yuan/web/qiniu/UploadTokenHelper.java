@@ -1,14 +1,8 @@
-package com.changhong.yuan.web.controller;
+package com.changhong.yuan.web.qiniu;
 
 import com.changhong.yuan.web.base.Utils.HMACSHA1Helper;
-import com.changhong.yuan.web.qiniu.QiniuCloudConfig;
 import com.google.gson.JsonObject;
-import com.qiniu.storage.UploadManager;
 import com.qiniu.util.UrlSafeBase64;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import static com.changhong.yuan.web.qiniu.QiniuCloudConfig.bucket;
 
@@ -16,32 +10,13 @@ import static com.changhong.yuan.web.qiniu.QiniuCloudConfig.bucket;
  * Created with IntelliJ IDEA.
  *
  * @authr: Fayang Yuan
- * @Date: 2015/12/17
- * @Time: 22:12
- * @Description:
+ * @Date: 2015/12/28
+ * @Time: 19:44
+ * @Description: 生成上传token
  */
-@Controller
-public class TestController {
+public class UploadTokenHelper {
 
-    private UploadManager uploadManager;
-
-    /**
-     *
-     * @param model
-     * @return
-     * 七牛上传策略
-     * scope = 'my-bucket:sunflower.jpg'
-    * deadline = 1451491200
-    returnBody = '{
-    "name": $(fname),
-    "size": $(fsize),
-    "w": $(imageInfo.width),
-    "h": $(imageInfo.height),
-    "hash": $(etag)
-    }'
-     */
-    @RequestMapping(value = "/test",method = RequestMethod.GET)
-    public String test(Model model){
+    public static String buildUploadToken() {
         String token = QiniuCloudConfig.auth.uploadToken(bucket);
 
         //七牛上传策略
@@ -62,7 +37,7 @@ public class TestController {
         //使用SecretKey对上一步生成的待签名字符串计算HMAC-SHA1签名
         byte[] sign = null;
         try {
-            sign = HMACSHA1Helper.HmacSHA1Encrypt(encodePutPolicy,QiniuCloudConfig.SECRET_KEY);
+            sign = HMACSHA1Helper.HmacSHA1Encrypt(encodePutPolicy, QiniuCloudConfig.SECRET_KEY);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -71,10 +46,8 @@ public class TestController {
         String encodeSign = UrlSafeBase64.encodeToString(sign);
 
         //将AccessKey、encodedSign和encodedPutPolicy用:连接起来：
-        String uploadToken = QiniuCloudConfig.ACCESS_KEY+":"+encodeSign+":"+encodePutPolicy;
+        String uploadToken = QiniuCloudConfig.ACCESS_KEY + ":" + encodeSign + ":" + encodePutPolicy;
 
-        model.addAttribute("token", uploadToken);
-        return "test";
+        return uploadToken;
     }
-
-  }
+}

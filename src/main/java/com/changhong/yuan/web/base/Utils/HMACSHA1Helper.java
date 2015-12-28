@@ -16,7 +16,7 @@ public class HMACSHA1Helper {
     private static final String MAC_NAME = "HmacSHA1";
     private static final String ENCODING = "UTF-8";
 
-    /*
+    /**
      * 展示了一个生成指定算法密钥的过程 初始化HMAC密钥
      * @return
      * @throws Exception
