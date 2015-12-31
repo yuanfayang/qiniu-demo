@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: xixi
-  Date: 2015/12/28
-  Time: 20:42
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@include file="../../common/taglib.jsp"%>
 <html>
@@ -30,7 +23,7 @@
 <script type="text/javascript">
   KindEditor.ready(function(K) {
     var options = {
-      uploadJson:"${ctx}/upload",
+      uploadJson:"http://upload.qiniu.com",
       allowFileManager: true,
       extraFileUploadParams:{
         token:'${token}',
@@ -60,3 +53,4 @@
 </script>
 </body>
 </html>
+

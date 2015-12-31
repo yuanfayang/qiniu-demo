@@ -13,7 +13,7 @@ public class QiniuCloudConfig {
     public static final String SECRET_KEY = "9pjZsWv1LM0yJ6N6h5iAlYV6lda-XiTjEXApoRDa";
     public static final String bucket = "yuan-test";
     public static final String key = "yuan-test.jpg";
-    public static final String domain = "7xpayt.com1.z0.glb.clouddn.com";
+    public static final String domain = "http://7xpayt.com1.z0.glb.clouddn.com";
 
     public static Auth auth = null;
     static {

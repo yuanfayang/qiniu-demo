@@ -2,8 +2,10 @@ package com.changhong.yuan.web.qiniu;
 
 import com.changhong.yuan.web.base.Utils.HMACSHA1Helper;
 import com.google.gson.JsonObject;
+import com.qiniu.util.StringMap;
 import com.qiniu.util.UrlSafeBase64;
 
+import static com.changhong.yuan.web.qiniu.QiniuCloudConfig.auth;
 import static com.changhong.yuan.web.qiniu.QiniuCloudConfig.bucket;
 
 /**
@@ -16,7 +18,11 @@ import static com.changhong.yuan.web.qiniu.QiniuCloudConfig.bucket;
  */
 public class UploadTokenHelper {
 
-    public static String buildUploadToken() {
+    /**
+     * 生成前端上传的token
+     * @return
+     */
+    public static String buildFrontEndUploadToken() {
         String token = QiniuCloudConfig.auth.uploadToken(bucket);
 
         //七牛上传策略
@@ -49,5 +55,13 @@ public class UploadTokenHelper {
         String uploadToken = QiniuCloudConfig.ACCESS_KEY + ":" + encodeSign + ":" + encodePutPolicy;
 
         return uploadToken;
+    }
+
+    /**
+     * 生成后端上传的token
+     * @return
+     */
+    public static String buildBackEndToken(){
+        return auth.uploadToken(QiniuCloudConfig.bucket,null,3600,new StringMap().putNotEmpty("returnBody","{\"key\": $(key), \"hash\": $(etag), \"width\": $(imageInfo.width), \"height\": $(imageInfo.height)}"));
     }
 }

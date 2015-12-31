@@ -2,6 +2,7 @@ package com.changhong.yuan.web.controller;
 
 import com.changhong.yuan.web.base.Utils.HMACSHA1Helper;
 import com.changhong.yuan.web.qiniu.QiniuCloudConfig;
+import com.changhong.yuan.web.qiniu.UploadTokenHelper;
 import com.google.gson.JsonObject;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.util.UrlSafeBase64;
@@ -24,6 +25,12 @@ import static com.changhong.yuan.web.qiniu.QiniuCloudConfig.bucket;
 public class TestController {
 
     private UploadManager uploadManager;
+
+    @RequestMapping(value = "/",method = RequestMethod.GET)
+    public String index(Model model){
+        model.addAttribute("token", UploadTokenHelper.buildFrontEndUploadToken());
+        return "index";
+    }
 
     /**
      *

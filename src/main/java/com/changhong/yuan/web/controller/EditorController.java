@@ -1,19 +1,29 @@
 package com.changhong.yuan.web.controller;
 
+import com.changhong.yuan.web.qiniu.MyRet;
+import com.changhong.yuan.web.qiniu.QiniuCloudConfig;
 import com.changhong.yuan.web.qiniu.UploadTokenHelper;
-import com.google.gson.JsonObject;
+import com.qiniu.common.QiniuException;
+import com.qiniu.http.Response;
+import com.qiniu.storage.UploadManager;
+import net.sf.json.JSONObject;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @authr: Fayang Yuan
@@ -24,18 +34,19 @@ import java.io.PrintWriter;
  */
 @Controller
 public class EditorController {
-    private final Log log = LogFactory.getLog(EditorController.class);
+    private final Logger logger = LoggerFactory.getLogger(EditorController.class);
 
     @RequestMapping(value = "/editor", method = RequestMethod.GET)
     public String view(Model model) {
-        model.addAttribute("token", UploadTokenHelper.buildUploadToken());
+        model.addAttribute("token", UploadTokenHelper.buildFrontEndUploadToken());
         return "editor";
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public void upload(HttpServletRequest request,
+    public void upload(@RequestParam(value = "file")MultipartFile file,
+                       HttpServletRequest request,
                        HttpServletResponse response) {
-        JsonObject jsonObject = new JsonObject();
+        JSONObject jsonObject = new JSONObject();
         PrintWriter out = null;
         try {
             out = response.getWriter();
@@ -44,15 +55,52 @@ public class EditorController {
         }
 
         if (ServletFileUpload.isMultipartContent(request)) {
-            log.info("*****文件上传");
+            logger.info("文件上传");
 
-            jsonObject.addProperty("error", 0);
-            jsonObject.addProperty("url", "http://image.baidu.com/search/detail?ct=503316480&z=undefined&tn=baiduimagedetail&ipn=d&word=kindeditor&step_word=&ie=utf-8&in=&cl=2&lm=-1&st=undefined&cs=1315447497,3169870753&os=3070755073,2276264566&simid=4193554957,645081131&pn=0&rn=1&di=107660090010&ln=1115&fr=&fmq=1451315447605_R&ic=undefined&s=undefined&se=&sme=&tab=0&width=&height=&face=undefined&is=&istype=0&ist=&jit=&bdtype=0&gsm=0&objurl=http%3A%2F%2Fwww.esoyu.com%2Fsoft%2FUploadPic%2F2013-10%2FKindEditor.jpg");
+            UploadManager uploadManager = new UploadManager();
+            String uploadToken = UploadTokenHelper.buildBackEndToken();
+            try {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+                    String time = sdf.format(new Date());
+                    Response qiniuResponse = uploadManager.put(file.getBytes(),time,uploadToken);
+                    logger.info("上传响应"+qiniuResponse);
+                    MyRet myRet = qiniuResponse.jsonToObject(MyRet.class);
+                    logger.info("返回数据"+JSONObject.fromObject(myRet));
+
+                    jsonObject.put("error", 0);
+                    jsonObject.put("url", QiniuCloudConfig.domain+"/"+myRet.key);
+                } catch (QiniuException e) {
+                    Response res = e.response;
+
+                    logger.error("上传文件出错"+res.toString());
+                    try {
+                        logger.error(res.bodyString());
+
+                        jsonObject.put("error", 1);
+                        jsonObject.put("message", res.bodyString());
+                    }catch (QiniuException e1){
+                        e.printStackTrace();
+
+                        jsonObject.put("error", 1);
+                        jsonObject.put("message", e1.getStackTrace());
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+
+                jsonObject.put("error", 1);
+                jsonObject.put("message", "解析文件出错");
+            }
+
+
         } else {
-            jsonObject.addProperty("error", 1);
-            jsonObject.addProperty("message", "不是多媒体");
+            jsonObject.put("error", 1);
+            jsonObject.put("message","请上传文件");
         }
 
         out.write(jsonObject.toString());
+        out.close();
     }
 }
